@@ -1,0 +1,54 @@
+pip install yfinance pandas matplotlib ta numpy flask
+import yfinance as yf
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Function to implement and backtest the intraday strategy
+def backtest_intraday_strategy(data, initial_investment=10000):
+    # Signal Generation
+    data['Buy_Signal'] = (data['Open'] == data['Low']).astype(int)
+    data['Sell_Signal'] = (data['Open'] == data['High']).astype(int)
+    
+    # Trade positions
+    data['Position'] = 0  # Initial position is neutral
+    for i in range(1, len(data)):
+        if data['Buy_Signal'].iloc[i] and data['Position'].iloc[i-1] == 0:
+            data.at[data.index[i], 'Position'] = 1  # Buy
+        elif data['Sell_Signal'].iloc[i] and data['Position'].iloc[i-1] == 1:
+            data.at[data.index[i], 'Position'] = 0  # Sell
+        else:
+            data.at[data.index[i], 'Position'] = data['Position'].iloc[i-1]  # Hold
+
+    # Calculate the returns
+    data['Market_Return'] = data['Close'].pct_change()
+    data['Strategy_Return'] = data['Market_Return'] * data['Position'].shift(1)
+
+    # Calculate cumulative returns
+    data['Cumulative_Market_Return'] = (1 + data['Market_Return']).cumprod()
+    data['Cumulative_Strategy_Return'] = (1 + data['Strategy_Return']).cumprod()
+
+    # Calculate investment value
+    data['Strategy_Investment_Value'] = initial_investment * data['Cumulative_Strategy_Return']
+
+    return data
+
+# Fetch intraday historical data (e.g., 1-minute intervals for the last 5 days)
+ticker = 'NVDA'
+data = yf.download(ticker, start='2024-06-01', end='2024-06-06', interval='5m')
+
+# Backtest the intraday strategy
+result = backtest_intraday_strategy(data)
+
+# Print final investment value
+final_investment_value = result['Strategy_Investment_Value'].iloc[-1]
+print(f'Final Investment Value: ${final_investment_value:.2f}')
+
+# Plot the results
+plt.figure(figsize=(14, 7))
+plt.plot(result.index, result['Cumulative_Market_Return'], label='Market Return', color='blue')
+plt.plot(result.index, result['Cumulative_Strategy_Return'], label='Strategy Return', color='red')
+plt.title(f'{ticker} Intraday Trading Strategy Backtest')
+plt.xlabel('Date')
+plt.ylabel('Cumulative Return')
+plt.legend()
+plt.show()
