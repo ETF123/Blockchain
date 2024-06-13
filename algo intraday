@@ -8,14 +8,17 @@ def backtest_intraday_strategy(data, initial_investment=10000):
     # Signal Generation
     data['Buy_Signal'] = (data['Open'] == data['Low']).astype(int)
     data['Sell_Signal'] = (data['Open'] == data['High']).astype(int)
-    
+
     # Trade positions
     data['Position'] = 0  # Initial position is neutral
+    trades = 0  # To count the number of trades
     for i in range(1, len(data)):
         if data['Buy_Signal'].iloc[i] and data['Position'].iloc[i-1] == 0:
             data.at[data.index[i], 'Position'] = 1  # Buy
+            trades += 1
         elif data['Sell_Signal'].iloc[i] and data['Position'].iloc[i-1] == 1:
             data.at[data.index[i], 'Position'] = 0  # Sell
+            trades += 1
         else:
             data.at[data.index[i], 'Position'] = data['Position'].iloc[i-1]  # Hold
 
@@ -27,22 +30,18 @@ def backtest_intraday_strategy(data, initial_investment=10000):
     data['Cumulative_Market_Return'] = (1 + data['Market_Return']).cumprod()
     data['Cumulative_Strategy_Return'] = (1 + data['Strategy_Return']).cumprod()
 
-    # Calculate investment value
-    data['Strategy_Investment_Value'] = initial_investment * data['Cumulative_Strategy_Return']
+    # Calculate the final portfolio value
+    data['Portfolio_Value'] = initial_investment * data['Cumulative_Strategy_Return']
+    final_portfolio_value = data['Portfolio_Value'].iloc[-1]
 
-    return data
+    return data, final_portfolio_value, trades
 
-# Fetch intraday historical data (e.g., 5-minute intervals for the last 6 days)
+# Fetch intraday historical data (e.g., 5-minute intervals )
 ticker = 'NVDA'
-data = yf.download(ticker, start='2024-06-01', end='2024-06-06', interval='5m')
+data = yf.download(ticker, start='2024-05-01', end='2024-06-11', interval='5m')
 
 # Backtest the intraday strategy
-result = backtest_intraday_strategy(data)
-
-# Print final investment value
-final_investment_value = result['Strategy_Investment_Value'].iloc[-1]
-print(f'Final Investment Value: ${final_investment_value:.2f}')
-print(" 6 Day return is",((final_investment_value-10000)/10000)*100,"%")
+result, final_portfolio_value, trades = backtest_intraday_strategy(data)
 
 # Plot the results
 plt.figure(figsize=(14, 7))
@@ -53,3 +52,8 @@ plt.xlabel('Date')
 plt.ylabel('Cumulative Return')
 plt.legend()
 plt.show()
+
+# Print the final returns and the number of trades
+print(f"Final Portfolio Value: ${final_portfolio_value:.2f}")
+print(" Final Return is",((final_portfolio_value-10000)/10000)*100,"%")
+print(f"Number of Trades: {trades}")
