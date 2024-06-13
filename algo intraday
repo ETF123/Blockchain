@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 # Function to implement and backtest the marubozu strategy
 def backtest_marubozu_strategy(data, initial_investment=10000):
     # Signal Generation
-    data['Buy_Signal'] = (data['Open'] == data['Low']).astype(int)#bullish_marubozu(green)
-    data['Sell_Signal'] = (data['Open'] == data['High']).astype(int)#bearish_marubozu(red)
+    data['Buy_Signal'] = (data['Open'] == data['Low']).astype(int)#bullish_open_marubozu(green)
+    data['Sell_Signal'] = (data['Open'] == data['High']).astype(int)#bearish_open_marubozu(red)
 
     # Trade positions
     data['Position'] = 0  # Initial position is neutral
