@@ -58,6 +58,8 @@ print(f"Final Portfolio Value: ${final_portfolio_value:.2f}")
 final_return=((final_portfolio_value-10000)/10000)*100
 print(" final return is",((final_portfolio_value-10000)/10000)*100,"%")
 print(f"Number of Trades: {trades}")
+cagr = (((final_portfolio_value/10000) ** (1 / 14)) - 1)*100
+print(cagr)
 
 
 # Check profitability
