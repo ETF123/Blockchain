@@ -38,7 +38,7 @@ def backtest_intraday_strategy(data, initial_investment=10000):
 
 # Fetch intraday historical data (e.g., 5-minute intervals )
 ticker = 'NVDA'
-data = yf.download(ticker, start='2024-05-01', end='2024-06-11', interval='5m')
+data = yf.download(ticker, start='2020-05-01', end='2024-06-11', interval='1d')
 
 # Backtest the intraday strategy
 result, final_portfolio_value, trades = backtest_intraday_strategy(data)
@@ -55,5 +55,13 @@ plt.show()
 
 # Print the final returns and the number of trades
 print(f"Final Portfolio Value: ${final_portfolio_value:.2f}")
-print(" Final Return is",((final_portfolio_value-10000)/10000)*100,"%")
+final_return=((final_portfolio_value-10000)/10000)*100
+print(" final return is",((final_portfolio_value-10000)/10000)*100,"%")
 print(f"Number of Trades: {trades}")
+
+
+# Check profitability
+if final_return > 0:
+    print("The strategy is profitable.")
+else:
+    print("The strategy is not profitable.")
