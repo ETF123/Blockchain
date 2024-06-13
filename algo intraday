@@ -3,8 +3,8 @@ import yfinance as yf
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Function to implement and backtest the intraday strategy
-def backtest_intraday_strategy(data, initial_investment=10000):
+# Function to implement and backtest the marubozu strategy
+def backtest_marubozu_strategy(data, initial_investment=10000):
     # Signal Generation
     data['Buy_Signal'] = (data['Open'] == data['Low']).astype(int)
     data['Sell_Signal'] = (data['Open'] == data['High']).astype(int)
@@ -36,18 +36,18 @@ def backtest_intraday_strategy(data, initial_investment=10000):
 
     return data, final_portfolio_value, trades
 
-# Fetch intraday historical data (e.g., 5-minute intervals )
+# Fetch marubozu historical data ( 1 day timeframe )
 ticker = 'NVDA'
-data = yf.download(ticker, start='2020-05-01', end='2024-06-11', interval='1d')
+data = yf.download(ticker, start='2010-05-01', end='2024-06-11', interval='1d')
 
 # Backtest the intraday strategy
-result, final_portfolio_value, trades = backtest_intraday_strategy(data)
+result, final_portfolio_value, trades = backtest_marubozu_strategy(data)
 
 # Plot the results
 plt.figure(figsize=(14, 7))
-plt.plot(result.index, result['Cumulative_Market_Return'], label='Market Return', color='blue')
-plt.plot(result.index, result['Cumulative_Strategy_Return'], label='Strategy Return', color='red')
-plt.title(f'{ticker} Intraday Trading Strategy Backtest')
+plt.plot(result.index, result['Cumulative_Market_Return'], label='Market Return since 2010', color='red')
+plt.plot(result.index, result['Cumulative_Strategy_Return'], label='Strategy Return since 2010', color='green')
+plt.title(f'{ticker} Marubozu Trading Strategy Backtest')
 plt.xlabel('Date')
 plt.ylabel('Cumulative Return')
 plt.legend()
@@ -65,3 +65,5 @@ if final_return > 0:
     print("The strategy is profitable.")
 else:
     print("The strategy is not profitable.")
+
+    
